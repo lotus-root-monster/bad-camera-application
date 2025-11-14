@@ -23,6 +23,22 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         surfaceRequest.value = newSurfaceRequest
     }
 
+    fun onCameraClick() {
+
+    }
+
+    fun onBombClick() {
+
+    }
+
+    fun onDestructionClick() {
+
+    }
+
+    fun onExplosionClick() {
+
+    }
+
     data class State(
         val surfaceRequest: SurfaceRequest?,
     ) {
