@@ -4,6 +4,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -48,12 +50,8 @@ fun BoxScope.CameraButtonsLayout(
     onExplosionClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    val canScrollBackward by remember {
-        derivedStateOf { scrollState.canScrollBackward }
-    }
-    val canScrollForward by remember {
-        derivedStateOf { scrollState.canScrollForward }
-    }
+    val canScrollBackward by remember { derivedStateOf { scrollState.canScrollBackward } }
+    val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
 
     if (isVertical) {
         ForVerticalLayout(
@@ -95,7 +93,17 @@ private fun BoxScope.ForVerticalLayout(
             .safeDrawingPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        Row(modifier = Modifier.horizontalScroll(scrollState)) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(scrollState)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(
+                    width = 2.dp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                )
+        ) {
             Spacer(modifier = Modifier.width(32.dp))
             CameraButtons(
                 onCameraClick = onCameraClick,
@@ -153,15 +161,25 @@ private fun BoxScope.ForHorizontalLayout(
             .safeDrawingPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        Column(modifier = Modifier.verticalScroll(scrollState)) {
-            Spacer(modifier = Modifier.width(32.dp))
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(
+                    width = 2.dp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                )
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
             CameraButtons(
                 onCameraClick = onCameraClick,
                 onBombClick = onBombClick,
                 onDestructionClick = onDestructionClick,
                 onExplosionClick = onExplosionClick,
             )
-            Spacer(modifier = Modifier.width(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
         Column(
             modifier = Modifier.fillMaxHeight(),

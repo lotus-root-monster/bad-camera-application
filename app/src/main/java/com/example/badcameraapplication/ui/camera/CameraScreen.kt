@@ -1,7 +1,7 @@
 package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -23,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.badcameraapplication.core.orientation.isPortrait
 import com.example.badcameraapplication.ui.camera.util.CameraButtonsLayout
 import com.example.badcameraapplication.ui.camera.util.CameraProvider
+import com.example.badcameraapplication.ui.camera.util.CameraWarningDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -44,17 +46,32 @@ fun CameraScreen(
             lifecycleOwner = lifecycleOwner,
         )
     }
-    Log.d("hogehoge", "$cameraProvider")
 
     CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
-        onCameraClick = viewModel::onCameraClick,
+        onCameraClick = cameraProvider::takePicture,
         onBombClick = viewModel::onBombClick,
         onDestructionClick = viewModel::onDestructionClick,
         onExplosionClick = viewModel::onExplosionClick,
     )
+
+    if (state.isShowWarningDialog) {
+        Dialog(onDismissRequest = viewModel::onDismissRequest) {
+            CameraWarningDialog(
+                onCancelClick = viewModel::onDismissRequest,
+                onConfirmClick = {
+                    viewModel.onConfirmClick()
+                    Toast.makeText(
+                        context,
+                        "未実装だよーんwww",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                },
+            )
+        }
+    }
 }
 
 @Composable
