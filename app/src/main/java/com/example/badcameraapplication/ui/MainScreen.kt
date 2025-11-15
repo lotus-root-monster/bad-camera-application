@@ -26,7 +26,7 @@ fun MainScreen() {
         onBack = backStack::removeLast,
         entryProvider = entryProvider {
             rootScreen(onNavigateToCameraClick = { backStack.add(CameraNavKey) })
-            cameraScreen()
+            cameraScreen(onBackClick = backStack::removeLast)
         }
     )
 }

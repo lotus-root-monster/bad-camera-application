@@ -6,6 +6,7 @@ import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import com.example.badcameraapplication.core.orientation.isPortrait
 import com.example.badcameraapplication.ui.camera.util.CameraButtonsLayout
 import com.example.badcameraapplication.ui.camera.util.CameraProvider
 import com.example.badcameraapplication.ui.camera.util.CameraWarningDialog
+import com.example.badcameraapplication.ui.components.BackButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -32,6 +34,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
+    onBackClick: () -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
@@ -50,6 +53,7 @@ fun CameraScreen(
     CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
+        onBackClick = onBackClick,
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
         onCameraClick = cameraProvider::takePicture,
         onBombClick = viewModel::onBombClick,
@@ -78,6 +82,7 @@ fun CameraScreen(
 private fun CameraScreen(
     state: CameraViewModel.State,
     isGranted: Boolean,
+    onBackClick: () -> Unit,
     onLaunchPermissionRequest: () -> Unit,
     onCameraClick: () -> Unit,
     onBombClick: () -> Unit,
@@ -103,6 +108,12 @@ private fun CameraScreen(
                 Text(text = "カメラの権限をリクエストする")
             }
         }
+        BackButton(
+            onBackClick = onBackClick,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .safeDrawingPadding()
+        )
     }
 }
 
@@ -126,6 +137,7 @@ private fun Preview() {
     CameraScreen(
         state = CameraViewModel.State.initialize(),
         isGranted = true,
+        onBackClick = {},
         onLaunchPermissionRequest = {},
         onCameraClick = {},
         onBombClick = {},

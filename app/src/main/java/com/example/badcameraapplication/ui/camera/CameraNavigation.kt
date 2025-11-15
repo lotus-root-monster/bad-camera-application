@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object CameraNavKey : NavKey
 
-fun EntryProviderScope<NavKey>.cameraScreen() {
+fun EntryProviderScope<NavKey>.cameraScreen(onBackClick: () -> Unit) {
     entry<CameraNavKey> {
-        CameraScreen()
+        CameraScreen(onBackClick = onBackClick)
     }
 }
