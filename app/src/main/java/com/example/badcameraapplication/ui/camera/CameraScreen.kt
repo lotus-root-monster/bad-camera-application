@@ -1,8 +1,6 @@
 package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
-import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.SurfaceRequest
@@ -22,10 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.badcameraapplication.core.orientation.isPortrait
@@ -89,7 +84,7 @@ fun CameraScreen(
         onCancelVandalism = {
             cameraProvider.onCancelVandalism()
             viewModel.onResetVandalism()
-                            },
+        },
     )
 
     if (state.isShowWarningDialog) {
