@@ -6,9 +6,7 @@ import android.os.Process
 import android.util.Log
 import java.io.File
 
-class CpuMonitor(
-    private val fetchCpuUsage: (Long) -> Unit,
-) {
+class CpuMonitor(private val fetchCpuUsage: (Long) -> Unit) {
     private var lastAppCpuTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
     private val numCores = Runtime.getRuntime().availableProcessors()
@@ -28,7 +26,8 @@ class CpuMonitor(
                 val appCpuTime = getAppCpuTime()
                 if (lastAppCpuTime > 0) {
                     val jiffiesPerSecond = 100L
-                    val totalJiffiesInInterval = (UPDATE_INTERVAL_MS / 1000) * jiffiesPerSecond * numCores
+                    val totalJiffiesInInterval =
+                        (UPDATE_INTERVAL_MS / 1000) * jiffiesPerSecond * numCores
 
                     if (totalJiffiesInInterval > 0) {
                         val appDiff = appCpuTime - lastAppCpuTime

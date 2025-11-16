@@ -21,7 +21,8 @@ class MainViewModel @Inject constructor() : ViewModel() {
     )
     private val latestFps = MutableStateFlow(0.0)
     private val latestCpuUsage = MutableStateFlow(0L)
-    val state = combine(latestFps, latestCpuUsage, ::State).stateIn(
+    private val latestRam = MutableStateFlow(0.0)
+    val state = combine(latestFps, latestCpuUsage, latestRam, ::State).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = State.initialize()
@@ -37,6 +38,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
         cpuMonitor.stopMonitoring()
     }
 
+    fun fetchRamUsage(currentRam: Double) {
+        latestRam.value = currentRam
+    }
+
     private fun fetchCurrentFps(currentFps: Double) {
         latestFps.value = currentFps
     }
@@ -48,11 +53,13 @@ class MainViewModel @Inject constructor() : ViewModel() {
     data class State(
         val latestFps: Double,
         val latestCpuUsage: Long,
+        val latestRam: Double,
     ) {
         companion object {
             fun initialize() = State(
                 latestFps = 0.0,
                 latestCpuUsage = 0L,
+                latestRam = 0.0,
             )
         }
     }

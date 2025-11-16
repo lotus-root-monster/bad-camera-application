@@ -1,10 +1,12 @@
 package com.example.badcameraapplication.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,9 +17,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -28,6 +32,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.example.badcameraapplication.core.performance.MemoryMonitor
 import com.example.badcameraapplication.ui.camera.CameraNavKey
 import com.example.badcameraapplication.ui.camera.cameraScreen
 import kotlinx.serialization.Serializable
@@ -35,13 +40,24 @@ import kotlinx.serialization.Serializable
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val memoryMonitor = remember {
+        MemoryMonitor(
+            context = context,
+            fetchRamUsage = viewModel::fetchRamUsage,
+        )
+    }
     val backStack = rememberNavBackStack(RootNavKey)
 
     LifecycleStartEffect(Unit) {
         viewModel.onStart()
-        onStopOrDispose { viewModel.onStop() }
+        memoryMonitor.startMonitoring()
+        onStopOrDispose {
+            viewModel.onStop()
+            memoryMonitor.stopMonitoring()
+        }
     }
 
     Box(
@@ -59,6 +75,7 @@ fun MainScreen(
         DisplayPerformance(
             latestFps = state.latestFps,
             latestCpuUsage = state.latestCpuUsage,
+            latestRam = state.latestRam,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .safeDrawingPadding(),
@@ -98,40 +115,42 @@ private fun RootScreen(
 private fun DisplayPerformance(
     latestFps: Double,
     latestCpuUsage: Long,
+    latestRam: Double,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .width(140.dp)
-            .background(
-                color = Color.White.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(
-                    topStartPercent = 50,
-                    bottomStartPercent = 50,
-                    topEndPercent = 0,
-                    bottomEndPercent = 0,
+    Row(modifier = modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            modifier = Modifier
+                .background(
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(
+                        topStartPercent = 50,
+                        bottomStartPercent = 50,
+                        topEndPercent = 0,
+                        bottomEndPercent = 0,
+                    )
                 )
-            )
-            .padding(
-                start = 26.dp,
-                end = 16.dp
-            )
-            .padding(vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(
+                    start = 32.dp,
+                    end = 16.dp
+                )
+                .padding(vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(text = "FPS:")
-            Text(text = "%2.1f".format(latestFps))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = "CPU:")
-            Text(text = "%3d%%".format(latestCpuUsage))
+            Row {
+                Column {
+                    Text(text = "FPS:")
+                    Text(text = "CPU 使用率:")
+                    Text(text = "RAM 使用率:")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = "%2.1f".format(latestFps))
+                    Text(text = "%3d%%".format(latestCpuUsage))
+                    Text(text = "%2.1f%%".format(latestRam))
+                }
+            }
         }
     }
 }
@@ -142,5 +161,6 @@ private fun DisplayPerformancePreview() {
     DisplayPerformance(
         latestFps = 12.345678,
         latestCpuUsage = 99,
+        latestRam = 99.9,
     )
 }

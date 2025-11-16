@@ -6,6 +6,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -271,6 +272,7 @@ private fun CameraButtons(
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             IconButton(
                 onClick = buttonParam.onClick,
@@ -305,7 +307,15 @@ private fun CameraButtons(
                         .fillMaxSize(),
                 )
             }
-            Text(text = it.contentDescription)
+            Text(
+                text = it.contentDescription,
+                modifier = Modifier
+                    .background(
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = CircleShape,
+                    )
+                    .padding(4.dp)
+            )
         }
     }
 }
