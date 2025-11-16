@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -252,7 +253,7 @@ private fun CameraButtons(
             currentVandalismType = null,
             iconResId = R.drawable.ic_cancel,
             contentDescription = "停止",
-            backgroundColor = Color.Green.copy(alpha = 0.5f),
+            backgroundColor = Color(0xFF80FF80),
             onClick = onCancelVandalism,
         )
     }
@@ -267,27 +268,44 @@ private fun CameraButtons(
                 it.currentVandalismType == currentVandalismType
         val buttonParam = if (isSelected) cancelButton else it
 
-        IconButton(
-            onClick = buttonParam.onClick,
-            modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp),
-            shape = CircleShape,
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = buttonParam.backgroundColor,
-                contentColor = Color.Black.copy(alpha = 0.5f),
-                disabledContainerColor = Color.Unspecified,
-                disabledContentColor = Color.Black.copy(alpha = 0.25f),
-            ),
-            enabled = currentVandalismType == null || isSelected
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                painter = painterResource(buttonParam.iconResId),
-                contentDescription = buttonParam.contentDescription,
+            IconButton(
+                onClick = buttonParam.onClick,
                 modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxSize(),
-            )
+                    .size(100.dp)
+                    .border(
+                        width = 3.dp,
+                        color = Color.Gray,
+                        shape = CircleShape,
+                    )
+                    .dropShadow(
+                        shape = CircleShape,
+                        shadow = Shadow(
+                            radius = 10.dp,
+                            color = Color.Black.copy(alpha = 0.25f),
+                        )
+                    ),
+                shape = CircleShape,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = buttonParam.backgroundColor,
+                    contentColor = Color(0xFF323232),
+                    disabledContainerColor = Color.DarkGray,
+                    disabledContentColor = Color.Gray,
+                ),
+                enabled = currentVandalismType == null || isSelected
+            ) {
+                Icon(
+                    painter = painterResource(buttonParam.iconResId),
+                    contentDescription = buttonParam.contentDescription,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxSize(),
+                )
+            }
+            Text(text = it.contentDescription)
         }
     }
 }
@@ -301,29 +319,29 @@ private fun cameraButtons(
     CameraButton(
         currentVandalismType = null,
         iconResId = R.drawable.ic_camera,
-        contentDescription = "カメラ",
-        backgroundColor = Color.White.copy(alpha = 0.5f),
+        contentDescription = "写真撮影",
+        backgroundColor = Color.White,
         onClick = onCameraCLick,
     ),
     CameraButton(
         currentVandalismType = VandalismType.BOMB,
         iconResId = R.drawable.ic_bomb,
         contentDescription = "爆弾",
-        backgroundColor = Color.Red.copy(alpha = 0.25f),
+        backgroundColor = Color(0xFFFF8080),
         onClick = onBombClick,
     ),
     CameraButton(
         currentVandalismType = VandalismType.DESTRUCTION,
         iconResId = R.drawable.ic_destruction,
         contentDescription = "破壊",
-        backgroundColor = Color.Red.copy(alpha = 0.25f),
+        backgroundColor = Color(0xFFFF8080),
         onClick = onDestructionClick,
     ),
     CameraButton(
         currentVandalismType = VandalismType.EXPLOSION,
         iconResId = R.drawable.ic_explosion,
         contentDescription = "最後の輝き",
-        backgroundColor = Color.Red.copy(alpha = 0.25f),
+        backgroundColor = Color(0xFFFF8080),
         onClick = onExplosionClick,
     )
 )
@@ -346,12 +364,30 @@ private fun ForVerticalPreview() {
     }
 }
 
-@Preview(heightDp = 400)
+@Preview(heightDp = 400, showBackground = true)
 @Composable
 private fun ForHorizontalPreview() {
     Box {
         ForHorizontalLayout(
             currentVandalismType = null,
+            scrollState = ScrollState(0),
+            canScrollBackward = true,
+            canScrollForward = true,
+            onCameraClick = {},
+            onBombClick = {},
+            onDestructionClick = {},
+            onExplosionClick = {},
+            onCancelVandalism = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SelectedPreview() {
+    Box {
+        ForVerticalLayout(
+            currentVandalismType = VandalismType.BOMB,
             scrollState = ScrollState(0),
             canScrollBackward = true,
             canScrollForward = true,
