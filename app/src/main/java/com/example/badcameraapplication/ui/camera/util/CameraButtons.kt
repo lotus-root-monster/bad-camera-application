@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -43,11 +44,13 @@ import com.example.badcameraapplication.ui.camera.model.CameraButton
 
 @Composable
 fun BoxScope.CameraButtonsLayout(
+    currentVandalismType: VandalismType?,
     isVertical: Boolean,
     onCameraClick: () -> Unit,
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
     onExplosionClick: () -> Unit,
+    onCancelVandalism: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val canScrollBackward by remember { derivedStateOf { scrollState.canScrollBackward } }
@@ -55,6 +58,7 @@ fun BoxScope.CameraButtonsLayout(
 
     if (isVertical) {
         ForVerticalLayout(
+            currentVandalismType = currentVandalismType,
             scrollState = scrollState,
             canScrollBackward = canScrollBackward,
             canScrollForward = canScrollForward,
@@ -62,9 +66,11 @@ fun BoxScope.CameraButtonsLayout(
             onBombClick = onBombClick,
             onDestructionClick = onDestructionClick,
             onExplosionClick = onExplosionClick,
+            onCancelVandalism = onCancelVandalism,
         )
     } else {
         ForHorizontalLayout(
+            currentVandalismType = currentVandalismType,
             scrollState = scrollState,
             canScrollBackward = canScrollBackward,
             canScrollForward = canScrollForward,
@@ -72,12 +78,14 @@ fun BoxScope.CameraButtonsLayout(
             onBombClick = onBombClick,
             onDestructionClick = onDestructionClick,
             onExplosionClick = onExplosionClick,
+            onCancelVandalism = onCancelVandalism,
         )
     }
 }
 
 @Composable
 private fun BoxScope.ForVerticalLayout(
+    currentVandalismType: VandalismType?,
     scrollState: ScrollState,
     canScrollBackward: Boolean,
     canScrollForward: Boolean,
@@ -85,6 +93,7 @@ private fun BoxScope.ForVerticalLayout(
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
     onExplosionClick: () -> Unit,
+    onCancelVandalism: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -106,10 +115,12 @@ private fun BoxScope.ForVerticalLayout(
         ) {
             Spacer(modifier = Modifier.width(32.dp))
             CameraButtons(
+                currentVandalismType = currentVandalismType,
                 onCameraClick = onCameraClick,
                 onBombClick = onBombClick,
                 onDestructionClick = onDestructionClick,
                 onExplosionClick = onExplosionClick,
+                onCancelVandalism = onCancelVandalism,
             )
             Spacer(modifier = Modifier.width(32.dp))
         }
@@ -146,6 +157,7 @@ private fun BoxScope.ForVerticalLayout(
 
 @Composable
 private fun BoxScope.ForHorizontalLayout(
+    currentVandalismType: VandalismType?,
     scrollState: ScrollState,
     canScrollBackward: Boolean,
     canScrollForward: Boolean,
@@ -153,6 +165,7 @@ private fun BoxScope.ForHorizontalLayout(
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
     onExplosionClick: () -> Unit,
+    onCancelVandalism: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -174,10 +187,12 @@ private fun BoxScope.ForHorizontalLayout(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
             CameraButtons(
+                currentVandalismType = currentVandalismType,
                 onCameraClick = onCameraClick,
                 onBombClick = onBombClick,
                 onDestructionClick = onDestructionClick,
                 onExplosionClick = onExplosionClick,
+                onCancelVandalism = onCancelVandalism,
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -225,32 +240,53 @@ private fun Modifier.arrowModifier() = this
 
 @Composable
 private fun CameraButtons(
+    currentVandalismType: VandalismType?,
     onCameraClick: () -> Unit,
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
     onExplosionClick: () -> Unit,
+    onCancelVandalism: () -> Unit,
 ) {
+    val cancelButton = remember {
+        CameraButton(
+            currentVandalismType = null,
+            iconResId = R.drawable.ic_cancel,
+            contentDescription = "停止",
+            backgroundColor = Color.Green.copy(alpha = 0.5f),
+            onClick = onCancelVandalism,
+        )
+    }
+
     cameraButtons(
         onCameraCLick = onCameraClick,
         onBombClick = onBombClick,
         onDestructionClick = onDestructionClick,
         onExplosionClick = onExplosionClick,
     ).forEach {
+        val isSelected = currentVandalismType != null &&
+                it.currentVandalismType == currentVandalismType
+        val buttonParam = if (isSelected) cancelButton else it
+
         IconButton(
-            onClick = it.onClick,
+            onClick = buttonParam.onClick,
             modifier = Modifier
                 .padding(16.dp)
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(it.backgroundColor)
+                .size(100.dp),
+            shape = CircleShape,
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = buttonParam.backgroundColor,
+                contentColor = Color.Black.copy(alpha = 0.5f),
+                disabledContainerColor = Color.Unspecified,
+                disabledContentColor = Color.Black.copy(alpha = 0.25f),
+            ),
+            enabled = currentVandalismType == null || isSelected
         ) {
             Icon(
-                painter = painterResource(it.iconResId),
-                contentDescription = it.contentDescription,
+                painter = painterResource(buttonParam.iconResId),
+                contentDescription = buttonParam.contentDescription,
                 modifier = Modifier
                     .padding(10.dp)
                     .fillMaxSize(),
-                tint = Color.Black.copy(alpha = 0.5f),
             )
         }
     }
@@ -263,24 +299,28 @@ private fun cameraButtons(
     onExplosionClick: () -> Unit,
 ) = listOf(
     CameraButton(
+        currentVandalismType = null,
         iconResId = R.drawable.ic_camera,
         contentDescription = "カメラ",
         backgroundColor = Color.White.copy(alpha = 0.5f),
         onClick = onCameraCLick,
     ),
     CameraButton(
+        currentVandalismType = VandalismType.BOMB,
         iconResId = R.drawable.ic_bomb,
         contentDescription = "爆弾",
         backgroundColor = Color.Red.copy(alpha = 0.25f),
         onClick = onBombClick,
     ),
     CameraButton(
+        currentVandalismType = VandalismType.DESTRUCTION,
         iconResId = R.drawable.ic_destruction,
         contentDescription = "破壊",
         backgroundColor = Color.Red.copy(alpha = 0.25f),
         onClick = onDestructionClick,
     ),
     CameraButton(
+        currentVandalismType = VandalismType.EXPLOSION,
         iconResId = R.drawable.ic_explosion,
         contentDescription = "最後の輝き",
         backgroundColor = Color.Red.copy(alpha = 0.25f),
@@ -293,6 +333,7 @@ private fun cameraButtons(
 private fun ForVerticalPreview() {
     Box {
         ForVerticalLayout(
+            currentVandalismType = null,
             scrollState = ScrollState(0),
             canScrollBackward = true,
             canScrollForward = true,
@@ -300,6 +341,7 @@ private fun ForVerticalPreview() {
             onBombClick = {},
             onDestructionClick = {},
             onExplosionClick = {},
+            onCancelVandalism = {},
         )
     }
 }
@@ -309,6 +351,7 @@ private fun ForVerticalPreview() {
 private fun ForHorizontalPreview() {
     Box {
         ForHorizontalLayout(
+            currentVandalismType = null,
             scrollState = ScrollState(0),
             canScrollBackward = true,
             canScrollForward = true,
@@ -316,6 +359,7 @@ private fun ForHorizontalPreview() {
             onBombClick = {},
             onDestructionClick = {},
             onExplosionClick = {},
+            onCancelVandalism = {},
         )
     }
 }

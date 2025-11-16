@@ -11,23 +11,25 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.concurrent.Executors
 
 class CameraProvider(
     private val onNewSurfaceRequest: (SurfaceRequest) -> Unit,
     private val context: Context,
-    lifecycleOwner: LifecycleOwner
+    private val lifecycleOwner: LifecycleOwner
 ) {
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+    private var cameraProvider: ProcessCameraProvider? = null
+
     private val imageCapture = ImageCapture.Builder().build()
-    private val imageName: String = "Broken_App" +
-            SimpleDateFormat("yyyy/MM/dd_hh:mm:ss", Locale.JAPAN).format(System.currentTimeMillis())
+    private val imageName: String = "Broken_App" + dateTime()
     private val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, imageName)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
@@ -39,42 +41,26 @@ class CameraProvider(
         contentValues
     ).build()
 
-
-    // TODO: 実装予定
-    private val analysisUseCase = ImageAnalysis.Builder()
+    private val imageAnalyzer = ImageAnalysis.Builder()
         .setResolutionSelector(
             ResolutionSelector.Builder()
-                .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                 .build()
         )
-        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .setImageQueueDepth(3)
         .build()
 
     init {
-        cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider { newSurfaceRequest ->
-                    onNewSurfaceRequest(newSurfaceRequest)
-                }
-            }
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture
+        cameraProviderFuture.addListener(
+            {
+                cameraProvider = cameraProviderFuture.get()
+                bindCamera(
+                    imageCaptureUseCase = imageCapture,
+                    imageAnalysisUseCase = imageAnalyzer,
                 )
-            } catch (e: Exception) {
-                Log.e("CameraProvider", "bindToLifecycleをしようとした", e)
-            }
-
-        }, ContextCompat.getMainExecutor(context))
+            },
+            ContextCompat.getMainExecutor(context),
+        )
     }
 
     fun takePicture() {
@@ -89,11 +75,52 @@ class CameraProvider(
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     Toast.makeText(
                         context,
-                        "写真を保存しました: $imageName",
+                        "写真を保存しました: ${contentValues.get(MediaStore.MediaColumns.DISPLAY_NAME)}",
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
             }
         )
     }
+
+    fun onDestruction() {
+        imageAnalyzer.setAnalyzer(
+            Executors.newSingleThreadExecutor(),
+            ImageAnalyzer(),
+        )
+    }
+
+    fun onCancelVandalism() {
+        imageAnalyzer.clearAnalyzer()
+    }
+
+    private fun bindCamera(
+        imageCaptureUseCase: ImageCapture? = null,
+        imageAnalysisUseCase: ImageAnalysis? = null,
+    ) {
+        val provider = cameraProvider ?: return
+        val previewUseCase = Preview.Builder().build().also {
+            it.setSurfaceProvider { newSurfaceRequest ->
+                onNewSurfaceRequest(newSurfaceRequest)
+            }
+        }
+        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+        try {
+            provider.unbindAll()
+            provider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                previewUseCase,
+                imageCaptureUseCase,
+                imageAnalysisUseCase,
+            )
+        } catch (e: Exception) {
+            Log.e("CameraProvider", "bindToLifecycleをしようとした", e)
+        }
+    }
+
+    private fun dateTime() = SimpleDateFormat(
+        "yyyy/MM/dd_hh:mm:ss",
+        Locale.JAPAN,
+    ).format(System.currentTimeMillis())
 }

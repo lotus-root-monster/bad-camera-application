@@ -1,6 +1,8 @@
 package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.SurfaceRequest
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,7 +22,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.badcameraapplication.core.orientation.isPortrait
@@ -50,6 +56,27 @@ fun CameraScreen(
         )
     }
 
+    LaunchedEffect(viewModel.event) {
+        viewModel.event.collect { event ->
+            when (event) {
+                is CameraViewModel.UiEvent.Bomb -> Unit
+                is CameraViewModel.UiEvent.Destruction -> {
+                    cameraProvider.onDestruction()
+                }
+
+                is CameraViewModel.UiEvent.Explosion -> Unit
+
+                is CameraViewModel.UiEvent.ResetVandalism -> {
+                    Toast.makeText(
+                        context,
+                        "リセットされました",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
+    }
+
     CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
@@ -59,20 +86,17 @@ fun CameraScreen(
         onBombClick = viewModel::onBombClick,
         onDestructionClick = viewModel::onDestructionClick,
         onExplosionClick = viewModel::onExplosionClick,
+        onCancelVandalism = {
+            cameraProvider.onCancelVandalism()
+            viewModel.onResetVandalism()
+                            },
     )
 
     if (state.isShowWarningDialog) {
         Dialog(onDismissRequest = viewModel::onDismissRequest) {
             CameraWarningDialog(
                 onCancelClick = viewModel::onDismissRequest,
-                onConfirmClick = {
-                    viewModel.onConfirmClick()
-                    Toast.makeText(
-                        context,
-                        "未実装だよーんwww",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                },
+                onConfirmClick = viewModel::onConfirmClick,
             )
         }
     }
@@ -88,6 +112,7 @@ private fun CameraScreen(
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
     onExplosionClick: () -> Unit,
+    onCancelVandalism: () -> Unit,
 ) {
     val isVertical = isPortrait()
     Box(
@@ -97,11 +122,13 @@ private fun CameraScreen(
         if (isGranted) {
             CameraXViewFinder(surfaceRequest = state.surfaceRequest)
             CameraButtonsLayout(
+                currentVandalismType = state.vandalismType,
                 isVertical = isVertical,
                 onCameraClick = onCameraClick,
                 onBombClick = onBombClick,
                 onDestructionClick = onDestructionClick,
                 onExplosionClick = onExplosionClick,
+                onCancelVandalism = onCancelVandalism,
             )
         } else {
             Button(onClick = onLaunchPermissionRequest) {
@@ -143,5 +170,6 @@ private fun Preview() {
         onBombClick = {},
         onDestructionClick = {},
         onExplosionClick = {},
+        onCancelVandalism = {},
     )
 }
