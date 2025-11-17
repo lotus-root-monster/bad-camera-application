@@ -23,11 +23,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.badcameraapplication.core.orientation.isPortrait
-import com.example.badcameraapplication.domain.model.CameraState
+import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.ui.camera.util.CameraButtonsLayout
 import com.example.badcameraapplication.ui.camera.util.CameraProvider
 import com.example.badcameraapplication.ui.camera.util.CameraWarningDialog
@@ -39,9 +41,9 @@ import com.google.accompanist.permissions.rememberPermissionState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
-    cameraState: CameraState,
+    cameraMode: CameraMode?,
     onBackClick: () -> Unit,
-    onNavigateToSettingClick: () -> Unit,
+    onNavigateToSettingClick: (CameraMode?) -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
@@ -51,11 +53,15 @@ fun CameraScreen(
 
     val cameraProvider = remember {
         CameraProvider(
-            cameraState = cameraState,
+            cameraMode = cameraMode ?: CameraMode.default,
             onNewSurfaceRequest = viewModel::onNewSurfaceRequest,
             context = context,
             lifecycleOwner = lifecycleOwner,
         )
+    }
+
+    LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
+        viewModel.onStart(initialCameraMode = cameraMode)
     }
 
     LaunchedEffect(viewModel.event) {
@@ -80,7 +86,9 @@ fun CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
         onBackClick = onBackClick,
-        onNavigateToSettingClick = onNavigateToSettingClick,
+        onNavigateToSettingClick = {
+            onNavigateToSettingClick(state.cameraMode)
+        },
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
         onCameraClick = cameraProvider::takePicture,
         onBombClick = viewModel::onBombClick,

@@ -1,50 +1,163 @@
 package com.example.badcameraapplication.ui.setting
 
 import android.util.Size
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.domain.model.CameraState
 
 
 @Composable
 fun SettingScreen(
-    onNavigateToCamera: (CameraState) -> Unit,
+    cameraMode: CameraMode,
+    onNavigateToCamera: (CameraMode) -> Unit,
     viewModel: SettingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
+        viewModel.onStart(initialCameraMode = cameraMode)
+    }
+
     SettingScreen(
-        onSaveClick = onNavigateToCamera,
+        state = state,
+        onCheckLensFacingClick = viewModel::onCheckLensFacingClick,
+        onCheckAspectRatioClick = viewModel::onCheckAspectRatioClick,
+        onCheckResolutionClick = viewModel::onCheckResolutionClick,
+        onCheckZoomClick = viewModel::onCheckZoomClick,
+        onCheckRecognizeClick = viewModel::onCheckRecognizeClick,
+        onSaveClick = {
+            onNavigateToCamera(
+                CameraMode(
+                    isLensFacingChecked = state.isLensFacingChecked,
+                    isCaptureRatioChecked = state.isCaptureRatioChecked,
+                    isResolutionChecked = state.isResolutionChecked,
+                    isZoomLevelChecked = state.isZoomLevelChecked,
+                    isUseImageAnalyzerChecked = state.isUseImageAnalyzerChecked,
+                )
+            )
+        },
     )
 }
 
 @Composable
 private fun SettingScreen(
-    onSaveClick: (CameraState) -> Unit
+    state: SettingViewModel.State,
+    onCheckLensFacingClick: (Boolean) -> Unit,
+    onCheckAspectRatioClick: (Boolean) -> Unit,
+    onCheckResolutionClick: (Boolean) -> Unit,
+    onCheckZoomClick: (Boolean) -> Unit,
+    onCheckRecognizeClick: (Boolean) -> Unit,
+    onSaveClick: (CameraState) -> Unit,
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(0.75f)
+            .safeDrawingPadding()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Button(onClick = {
-            onSaveClick(
-                CameraState.default.copy(
-                    resolution = Size(
-                        720,
-                        1280,
-                    )
+        SettingItem(
+            title = "前面カメラ",
+            isChecked = state.isLensFacingChecked,
+            onCheckedChange = onCheckLensFacingClick,
+        )
+        SettingItem(
+            title = "アスペクト比16:9",
+            isChecked = state.isCaptureRatioChecked,
+            onCheckedChange = onCheckAspectRatioClick,
+        )
+        SettingItem(
+            title = "高解像度",
+            isChecked = state.isResolutionChecked,
+            onCheckedChange = onCheckResolutionClick,
+        )
+        SettingItem(
+            title = "最大ズーム",
+            isChecked = state.isZoomLevelChecked,
+            onCheckedChange = onCheckZoomClick,
+        )
+        SettingItem(
+            title = "画像認識",
+            isChecked = state.isUseImageAnalyzerChecked,
+            onCheckedChange = onCheckRecognizeClick,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Button(
+            onClick = {
+                onSaveClick(
+                    CameraState.default.copy(resolution = Size(720, 1280))
                 )
-            )
-        }) {
+            }
+        ) {
             Text(text = "設定を保存する")
         }
     }
+}
+
+@Composable
+private fun SettingItem(
+    isChecked: Boolean,
+    title: String,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(8.dp),
+            )
+            .padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = title)
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    SettingScreen(
+        state = SettingViewModel.State.initialize(),
+        onCheckLensFacingClick = {},
+        onCheckAspectRatioClick = {},
+        onCheckResolutionClick = {},
+        onCheckZoomClick = {},
+        onCheckRecognizeClick = {},
+        onSaveClick = {}
+    )
 }

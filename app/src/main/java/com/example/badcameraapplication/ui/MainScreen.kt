@@ -1,6 +1,9 @@
 package com.example.badcameraapplication.ui
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,20 +30,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.badcameraapplication.core.performance.MemoryMonitor
-import com.example.badcameraapplication.domain.model.CameraState
-import com.example.badcameraapplication.domain.model.serialize
+import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.ui.camera.CameraNavKey
 import com.example.badcameraapplication.ui.camera.cameraScreen
 import com.example.badcameraapplication.ui.setting.SettingNavKey
 import com.example.badcameraapplication.ui.setting.settingScreen
 import kotlinx.serialization.Serializable
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
@@ -65,25 +70,32 @@ fun MainScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.LightGray),
         contentAlignment = Alignment.Center,
     ) {
         NavDisplay(
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
             backStack = backStack,
             onBack = backStack::removeLast,
             entryProvider = entryProvider {
                 rootScreen(
-                    onNavigateToCameraClick = {
-                        backStack.add(CameraNavKey(CameraState.default.serialize()))
-                    }
+                    onNavigateToCameraClick = { backStack.add(CameraNavKey(CameraMode.default)) }
                 )
                 cameraScreen(
                     onBackClick = backStack::removeLast,
-                    onNavigateToSettingClick = { backStack.add(SettingNavKey) },
+                    onNavigateToSettingClick = { key ->
+                        backStack.add(SettingNavKey(key ?: CameraMode.default))
+                    },
                 )
                 settingScreen(
-                    onNavigateToCameraClick = { state ->
-                        backStack.add(CameraNavKey(state.serialize()))
+                    onNavigateToCameraClick = { key ->
+                        backStack.removeAll { it != RootNavKey }
+                        backStack.add(CameraNavKey(key))
                     }
                 )
             }

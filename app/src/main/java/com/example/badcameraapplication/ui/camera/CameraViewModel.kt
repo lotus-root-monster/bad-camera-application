@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.camera.core.SurfaceRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.ui.camera.util.VandalismType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,8 +21,9 @@ class CameraViewModel @Inject constructor() : ViewModel() {
     private val surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     private val isShowWarningDialog = MutableStateFlow(false)
     private val vandalismType = MutableStateFlow<VandalismType?>(null)
+    private val cameraMode = MutableStateFlow<CameraMode?>(null)
 
-    val state = combine(surfaceRequest, isShowWarningDialog, vandalismType, ::State).stateIn(
+    val state = combine(surfaceRequest, isShowWarningDialog, vandalismType, cameraMode, ::State).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = State.initialize(),
@@ -29,6 +31,12 @@ class CameraViewModel @Inject constructor() : ViewModel() {
 
     private val _event = Channel<UiEvent>(Channel.CONFLATED)
     val event = _event.receiveAsFlow()
+
+    fun onStart(initialCameraMode: CameraMode?) {
+        if(initialCameraMode != null){
+            cameraMode.value = initialCameraMode
+        }
+    }
 
     fun onNewSurfaceRequest(newSurfaceRequest: SurfaceRequest) {
         surfaceRequest.value = newSurfaceRequest
@@ -86,12 +94,14 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         val surfaceRequest: SurfaceRequest?,
         val isShowWarningDialog: Boolean,
         val vandalismType: VandalismType?,
+        val cameraMode: CameraMode?
     ) {
         companion object {
             fun initialize() = State(
                 surfaceRequest = null,
                 isShowWarningDialog = false,
                 vandalismType = null,
+                cameraMode = null,
             )
         }
     }

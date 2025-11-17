@@ -1,59 +1,79 @@
 package com.example.badcameraapplication.ui.setting
 
-import android.util.Log
-import androidx.camera.core.AspectRatio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.badcameraapplication.domain.model.CameraState
+import com.example.badcameraapplication.domain.model.CameraMode
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor() : ViewModel() {
-    private val cameraState = MutableStateFlow(CameraState.default)
-    val state: StateFlow<CameraState> = cameraState.stateIn(
+    private val isLensFacingChecked = MutableStateFlow(false)
+    private val isCaptureRatioChecked = MutableStateFlow(false)
+    private val isResolutionChecked = MutableStateFlow(false)
+    private val isZoomLevelChecked = MutableStateFlow(false)
+    private val isUseImageAnalyzerChecked = MutableStateFlow(false)
+
+    val state = combine(
+        isLensFacingChecked,
+        isCaptureRatioChecked,
+        isResolutionChecked,
+        isZoomLevelChecked,
+        isUseImageAnalyzerChecked,
+        ::State
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CameraState.default,
+        initialValue = State.initialize(),
     )
 
-    init {
-        viewModelScope.launch {
-            while (isActive) {
-                delay(3000L)
-                Log.d("hogehoge", "ｄｋんｃｆんｊｄ")
-                updateSettings(
-                    cameraState.value.copy(
-                        useImageAnalyzer = true,
-                    )
-                )
-            }
+    fun onStart(initialCameraMode: CameraMode) {
+        isLensFacingChecked.value = initialCameraMode.isLensFacingChecked
+        isCaptureRatioChecked.value = initialCameraMode.isCaptureRatioChecked
+        isResolutionChecked.value = initialCameraMode.isResolutionChecked
+        isZoomLevelChecked.value = initialCameraMode.isZoomLevelChecked
+        isUseImageAnalyzerChecked.value = initialCameraMode.isUseImageAnalyzerChecked
+    }
+
+    fun onCheckLensFacingClick(isCheck: Boolean) {
+        isLensFacingChecked.value = isCheck
+    }
+
+    fun onCheckAspectRatioClick(isCheck: Boolean) {
+        isCaptureRatioChecked.value = isCheck
+    }
+
+    fun onCheckResolutionClick(isCheck: Boolean) {
+        isResolutionChecked.value = isCheck
+    }
+
+    fun onCheckZoomClick(isCheck: Boolean) {
+        isZoomLevelChecked.value = isCheck
+    }
+
+    fun onCheckRecognizeClick(isCheck: Boolean) {
+        isUseImageAnalyzerChecked.value = isCheck
+    }
+
+    data class State(
+        val isLensFacingChecked: Boolean,
+        val isCaptureRatioChecked: Boolean,
+        val isResolutionChecked: Boolean,
+        val isZoomLevelChecked: Boolean,
+        val isUseImageAnalyzerChecked: Boolean,
+    ) {
+        companion object {
+            fun initialize() = State(
+                isLensFacingChecked = false,
+                isCaptureRatioChecked = false,
+                isResolutionChecked = false,
+                isZoomLevelChecked = false,
+                isUseImageAnalyzerChecked = false,
+            )
         }
-    }
-
-    // 設定を変更する関数（UIから呼び出される）
-    fun updateSettings(newState: CameraState) {
-        cameraState.value = newState
-    }
-
-    // 例: アスペクト比を切り替える
-    fun toggleAspectRatio() {
-        val currentRatio = cameraState.value.captureRatio
-        val newRatio =
-            if (currentRatio == AspectRatio.RATIO_4_3) AspectRatio.RATIO_16_9 else AspectRatio.RATIO_4_3
-        cameraState.update { it.copy(captureRatio = newRatio) }
-    }
-
-    // 例: ズームレベルを変更
-    fun setZoom(level: Float) {
-        cameraState.update { it.copy(zoomLevel = level.coerceIn(1.0f, 5.0f)) } // 範囲制限
     }
 }

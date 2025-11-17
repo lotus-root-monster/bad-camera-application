@@ -17,13 +17,14 @@ import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.domain.model.CameraState
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.Executors
 
 class CameraProvider(
-    cameraState: CameraState,
+    cameraMode: CameraMode,
     private val onNewSurfaceRequest: (SurfaceRequest) -> Unit,
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
@@ -43,7 +44,11 @@ class CameraProvider(
                 .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                 .setResolutionStrategy(
                     ResolutionStrategy(
-                        cameraState.resolution,
+                        if (cameraMode.isResolutionChecked) {
+                            CameraState.highSpecification.resolution
+                        } else {
+                            CameraState.default.resolution
+                        },
                         ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
                     ),
                 )
