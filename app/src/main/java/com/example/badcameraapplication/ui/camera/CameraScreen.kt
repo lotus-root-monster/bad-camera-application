@@ -2,6 +2,8 @@ package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
 import androidx.camera.compose.CameraXViewfinder
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,8 +13,10 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -32,6 +36,7 @@ import com.example.badcameraapplication.ui.components.BackButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import androidx.camera.core.Preview as CameraPreview
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -49,10 +54,37 @@ fun CameraScreen(
     val cameraProvider = remember {
         CameraProvider(
             cameraMode = cameraMode ?: CameraMode.default,
-            onNewSurfaceRequest = viewModel::onNewSurfaceRequest,
             context = context,
             lifecycleOwner = lifecycleOwner,
         )
+    }
+    val preview = remember {
+        CameraPreview.Builder()
+            .setResolutionSelector(cameraProvider.resolution())
+            .build()
+            .also { it.setSurfaceProvider(viewModel::onNewSurfaceRequest) }
+    }
+    val imageCapture = remember {
+        ImageCapture.Builder()
+            .setResolutionSelector(cameraProvider.resolution())
+            .build()
+    }
+    val imageAnalyzer = remember {
+        ImageAnalysis.Builder()
+            .setResolutionSelector(cameraProvider.resolution())
+            .build()
+    }
+
+    LaunchedEffect(cameraPermissionState) {
+        snapshotFlow { cameraPermissionState.status.isGranted }.collect {
+            if(it) {
+                cameraProvider.bindCamera(
+                    preview = preview,
+                    imageCapture = imageCapture,
+                    imageAnalyzer = imageAnalyzer,
+                )
+            }
+        }
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
@@ -67,7 +99,7 @@ fun CameraScreen(
             onNavigateToSettingClick(state.cameraMode)
         },
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
-        onCameraClick = cameraProvider::takePicture,
+        onCameraClick = { cameraProvider.takePicture(imageCapture = imageCapture) },
     )
 }
 
@@ -111,9 +143,7 @@ private fun CameraScreen(
 }
 
 @Composable
-private fun CameraXViewFinder(
-    surfaceRequest: SurfaceRequest?,
-) {
+private fun CameraXViewFinder(surfaceRequest: SurfaceRequest?) {
     surfaceRequest?.let { request ->
         CameraXViewfinder(
             surfaceRequest = request,
