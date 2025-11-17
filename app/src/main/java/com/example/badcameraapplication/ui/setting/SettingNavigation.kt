@@ -10,10 +10,14 @@ data class SettingNavKey(
     val cameraMode: CameraMode,
 ) : NavKey
 
-fun EntryProviderScope<NavKey>.settingScreen(onNavigateToCameraClick: (CameraMode) -> Unit) {
+fun EntryProviderScope<NavKey>.settingScreen(
+    onBackClick: () -> Unit,
+    onNavigateToCameraClick: (CameraMode) -> Unit,
+) {
     entry<SettingNavKey> { key ->
         SettingScreen(
             cameraMode = key.cameraMode,
+            onBackClick = onBackClick,
             onNavigateToCamera = onNavigateToCameraClick
         )
     }

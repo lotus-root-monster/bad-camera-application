@@ -21,18 +21,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.badcameraapplication.core.orientation.isPortrait
 import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.ui.camera.util.CameraButtonsLayout
 import com.example.badcameraapplication.ui.camera.util.CameraProvider
-import com.example.badcameraapplication.ui.camera.util.CameraWarningDialog
 import com.example.badcameraapplication.ui.components.BackButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -91,23 +88,7 @@ fun CameraScreen(
         },
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
         onCameraClick = cameraProvider::takePicture,
-        onBombClick = viewModel::onBombClick,
-        onDestructionClick = viewModel::onDestructionClick,
-        onExplosionClick = viewModel::onExplosionClick,
-        onCancelVandalism = {
-            cameraProvider.onCancelVandalism()
-            viewModel.onResetVandalism()
-        },
     )
-
-    if (state.isShowWarningDialog) {
-        Dialog(onDismissRequest = viewModel::onDismissRequest) {
-            CameraWarningDialog(
-                onCancelClick = viewModel::onDismissRequest,
-                onConfirmClick = viewModel::onConfirmClick,
-            )
-        }
-    }
 }
 
 @Composable
@@ -118,12 +99,7 @@ private fun CameraScreen(
     onNavigateToSettingClick: () -> Unit,
     onLaunchPermissionRequest: () -> Unit,
     onCameraClick: () -> Unit,
-    onBombClick: () -> Unit,
-    onDestructionClick: () -> Unit,
-    onExplosionClick: () -> Unit,
-    onCancelVandalism: () -> Unit,
 ) {
-    val isVertical = isPortrait()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -131,14 +107,8 @@ private fun CameraScreen(
         if (isGranted) {
             CameraXViewFinder(surfaceRequest = state.surfaceRequest)
             CameraButtonsLayout(
-                currentVandalismType = state.vandalismType,
-                isVertical = isVertical,
                 onNavigateToSettingClick = onNavigateToSettingClick,
                 onCameraClick = onCameraClick,
-                onBombClick = onBombClick,
-                onDestructionClick = onDestructionClick,
-                onExplosionClick = onExplosionClick,
-                onCancelVandalism = onCancelVandalism,
             )
         } else {
             Column(
@@ -184,9 +154,5 @@ private fun Preview() {
         onNavigateToSettingClick = {},
         onLaunchPermissionRequest = {},
         onCameraClick = {},
-        onBombClick = {},
-        onDestructionClick = {},
-        onExplosionClick = {},
-        onCancelVandalism = {},
     )
 }

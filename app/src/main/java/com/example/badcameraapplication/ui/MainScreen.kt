@@ -2,7 +2,6 @@ package com.example.badcameraapplication.ui
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -93,6 +92,7 @@ fun MainScreen(
                     },
                 )
                 settingScreen(
+                    onBackClick = backStack::removeLast,
                     onNavigateToCameraClick = { key ->
                         backStack.removeAll { it != RootNavKey }
                         backStack.add(CameraNavKey(key))
