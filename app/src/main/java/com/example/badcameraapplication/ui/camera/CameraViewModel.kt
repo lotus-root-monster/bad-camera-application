@@ -70,8 +70,8 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         _event.send(UiEvent.ResetVandalism)
     }
 
-    private fun onBomb() {
-        Log.d("hogehoge", "onBomb")
+    private fun onBomb() = viewModelScope.launch {
+        _event.send(UiEvent.Bomb)
     }
 
     private fun onDestruction() = viewModelScope.launch {

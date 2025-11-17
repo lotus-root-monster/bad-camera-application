@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -48,6 +49,7 @@ import com.example.badcameraapplication.ui.camera.model.CameraButton
 fun BoxScope.CameraButtonsLayout(
     currentVandalismType: VandalismType?,
     isVertical: Boolean,
+    onNavigateToSettingClick: () -> Unit,
     onCameraClick: () -> Unit,
     onBombClick: () -> Unit,
     onDestructionClick: () -> Unit,
@@ -58,30 +60,36 @@ fun BoxScope.CameraButtonsLayout(
     val canScrollBackward by remember { derivedStateOf { scrollState.canScrollBackward } }
     val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
 
-    if (isVertical) {
-        ForVerticalLayout(
-            currentVandalismType = currentVandalismType,
-            scrollState = scrollState,
-            canScrollBackward = canScrollBackward,
-            canScrollForward = canScrollForward,
-            onCameraClick = onCameraClick,
-            onBombClick = onBombClick,
-            onDestructionClick = onDestructionClick,
-            onExplosionClick = onExplosionClick,
-            onCancelVandalism = onCancelVandalism,
-        )
-    } else {
-        ForHorizontalLayout(
-            currentVandalismType = currentVandalismType,
-            scrollState = scrollState,
-            canScrollBackward = canScrollBackward,
-            canScrollForward = canScrollForward,
-            onCameraClick = onCameraClick,
-            onBombClick = onBombClick,
-            onDestructionClick = onDestructionClick,
-            onExplosionClick = onExplosionClick,
-            onCancelVandalism = onCancelVandalism,
-        )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isVertical) {
+            ForVerticalLayout(
+                currentVandalismType = currentVandalismType,
+                scrollState = scrollState,
+                canScrollBackward = canScrollBackward,
+                canScrollForward = canScrollForward,
+                onCameraClick = onCameraClick,
+                onBombClick = onBombClick,
+                onDestructionClick = onDestructionClick,
+                onExplosionClick = onExplosionClick,
+                onCancelVandalism = onCancelVandalism,
+            )
+        } else {
+            ForHorizontalLayout(
+                currentVandalismType = currentVandalismType,
+                scrollState = scrollState,
+                canScrollBackward = canScrollBackward,
+                canScrollForward = canScrollForward,
+                onCameraClick = onCameraClick,
+                onBombClick = onBombClick,
+                onDestructionClick = onDestructionClick,
+                onExplosionClick = onExplosionClick,
+                onCancelVandalism = onCancelVandalism,
+            )
+        }
+        Button(onClick = onNavigateToSettingClick) { Text(text = "設定画面へ") }
     }
 }
 

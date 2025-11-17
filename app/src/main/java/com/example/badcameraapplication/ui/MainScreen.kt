@@ -33,8 +33,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.badcameraapplication.core.performance.MemoryMonitor
+import com.example.badcameraapplication.domain.model.CameraState
+import com.example.badcameraapplication.domain.model.serialize
 import com.example.badcameraapplication.ui.camera.CameraNavKey
 import com.example.badcameraapplication.ui.camera.cameraScreen
+import com.example.badcameraapplication.ui.setting.SettingNavKey
+import com.example.badcameraapplication.ui.setting.settingScreen
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -68,8 +72,20 @@ fun MainScreen(
             backStack = backStack,
             onBack = backStack::removeLast,
             entryProvider = entryProvider {
-                rootScreen(onNavigateToCameraClick = { backStack.add(CameraNavKey) })
-                cameraScreen(onBackClick = backStack::removeLast)
+                rootScreen(
+                    onNavigateToCameraClick = {
+                        backStack.add(CameraNavKey(CameraState.default.serialize()))
+                    }
+                )
+                cameraScreen(
+                    onBackClick = backStack::removeLast,
+                    onNavigateToSettingClick = { backStack.add(SettingNavKey) },
+                )
+                settingScreen(
+                    onNavigateToCameraClick = { state ->
+                        backStack.add(CameraNavKey(state.serialize()))
+                    }
+                )
             }
         )
         DisplayPerformance(
@@ -86,24 +102,23 @@ fun MainScreen(
 @Serializable
 private data object RootNavKey : NavKey
 
-private fun EntryProviderScope<NavKey>.rootScreen(
-    onNavigateToCameraClick: () -> Unit,
-) {
+private fun EntryProviderScope<NavKey>.rootScreen(onNavigateToCameraClick: () -> Unit) {
     entry<RootNavKey> {
-        RootScreen(onLaunchCameraClick = onNavigateToCameraClick)
+        RootScreen(onNavigateToCameraClick = onNavigateToCameraClick)
     }
 }
 
 @Composable
 private fun RootScreen(
-    onLaunchCameraClick: () -> Unit,
+    onNavigateToCameraClick: () -> Unit,
 ) {
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Button(
-            onClick = onLaunchCameraClick,
+            onClick = onNavigateToCameraClick,
             modifier = Modifier.fillMaxWidth(0.75f),
         ) {
             Text(text = "カメラを起動")
