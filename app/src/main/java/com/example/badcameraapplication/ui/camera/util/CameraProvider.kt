@@ -24,36 +24,45 @@ import java.util.Locale
 import java.util.concurrent.Executors
 
 class CameraProvider(
-    cameraMode: CameraMode,
+    private val cameraMode: CameraMode,
     private val onNewSurfaceRequest: (SurfaceRequest) -> Unit,
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
 ) {
+    private val resolutionStrategy = ResolutionStrategy(
+        if (cameraMode.isResolutionChecked) {
+            CameraState.highSpecification.resolution
+        } else {
+            CameraState.default.resolution
+        },
+        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+    )
+    private val aspectRatioStrategy = AspectRatioStrategy(
+        if (cameraMode.isCaptureRatioChecked) {
+            CameraState.highSpecification.captureRatio
+        } else {
+            CameraState.default.captureRatio
+        },
+        AspectRatioStrategy.FALLBACK_RULE_AUTO,
+    )
+    private val resolutionSelector = ResolutionSelector.Builder()
+        .setAspectRatioStrategy(aspectRatioStrategy)
+        .setResolutionStrategy(resolutionStrategy)
+        .build()
+
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
     private var cameraProvider: ProcessCameraProvider? = null
     private var preview = Preview.Builder()
-        .build().also {
-            it.setSurfaceProvider { newSurfaceRequest ->
-                onNewSurfaceRequest(newSurfaceRequest)
-            }
+        .setResolutionSelector(resolutionSelector)
+        .build()
+        .also {
+            it.setSurfaceProvider { newSurfaceRequest -> onNewSurfaceRequest(newSurfaceRequest) }
         }
-    private val imageCapture = ImageCapture.Builder().build()
+    private val imageCapture = ImageCapture.Builder()
+        .setResolutionSelector(resolutionSelector)
+        .build()
     private val imageAnalyzer = ImageAnalysis.Builder()
-        .setResolutionSelector(
-            ResolutionSelector.Builder()
-                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
-                .setResolutionStrategy(
-                    ResolutionStrategy(
-                        if (cameraMode.isResolutionChecked) {
-                            CameraState.highSpecification.resolution
-                        } else {
-                            CameraState.default.resolution
-                        },
-                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
-                    ),
-                )
-                .build()
-        )
+        .setResolutionSelector(resolutionSelector)
         .build()
 
     init {
@@ -98,23 +107,15 @@ class CameraProvider(
         )
     }
 
-    fun onBomb() {
-    }
-
-    fun onDestruction() {
-        imageAnalyzer.setAnalyzer(
-            Executors.newSingleThreadExecutor(),
-            ImageAnalyzer(),
-        )
-    }
-
-    fun onCancelVandalism() {
-        imageAnalyzer.clearAnalyzer()
-    }
-
     private fun bindCamera() {
         val provider = cameraProvider ?: return
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+        if (cameraMode.isUseImageAnalyzerChecked) {
+            imageAnalyzer.setAnalyzer(
+                Executors.newSingleThreadExecutor(),
+                ImageAnalyzer(),
+            )
+        }
         try {
             ContextCompat.getMainExecutor(context).execute {
                 provider.unbindAll()

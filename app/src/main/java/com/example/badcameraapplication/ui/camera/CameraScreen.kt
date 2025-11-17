@@ -1,7 +1,6 @@
 package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
-import android.widget.Toast
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,24 +57,6 @@ fun CameraScreen(
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.onStart(initialCameraMode = cameraMode)
-    }
-
-    LaunchedEffect(viewModel.event) {
-        viewModel.event.collect { event ->
-            when (event) {
-                is CameraViewModel.UiEvent.Bomb -> cameraProvider.onBomb()
-                is CameraViewModel.UiEvent.Destruction -> cameraProvider.onDestruction()
-                is CameraViewModel.UiEvent.Explosion -> Unit
-
-                is CameraViewModel.UiEvent.ResetVandalism -> {
-                    Toast.makeText(
-                        context,
-                        "リセットされました",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-            }
-        }
     }
 
     CameraScreen(
