@@ -71,8 +71,9 @@ private fun SettingScreen(
     val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
-            .safeDrawingPadding()
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(Color.LightGray)
+            .safeDrawingPadding(),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

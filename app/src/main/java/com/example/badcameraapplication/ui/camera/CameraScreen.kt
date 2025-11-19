@@ -7,6 +7,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,9 +116,7 @@ fun CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
         onBackClick = onBackClick,
-        onNavigateToSettingClick = {
-            onNavigateToSettingClick(state.cameraMode)
-        },
+        onNavigateToSettingClick = { onNavigateToSettingClick(state.cameraMode) },
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
         onCameraClick = { cameraProvider.takePicture(imageCapture = imageCapture) },
     )
@@ -133,7 +132,9 @@ private fun CameraScreen(
     onCameraClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.LightGray),
         contentAlignment = Alignment.Center,
     ) {
         if (isGranted) {
