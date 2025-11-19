@@ -47,8 +47,6 @@ fun SettingScreen(
 
     SettingScreen(
         state = state,
-        onCheckLensFacingClick = viewModel::onCheckLensFacingClick,
-        onCheckAspectRatioClick = viewModel::onCheckAspectRatioClick,
         onCheckResolutionClick = viewModel::onCheckResolutionClick,
         onCheckRecognizeClick = viewModel::onCheckRecognizeClick,
         onCheckMFNRClick = viewModel::onCheckMFNRClick,
@@ -60,8 +58,6 @@ fun SettingScreen(
 @Composable
 private fun SettingScreen(
     state: SettingViewModel.State,
-    onCheckLensFacingClick: (Boolean) -> Unit,
-    onCheckAspectRatioClick: (Boolean) -> Unit,
     onCheckResolutionClick: (Boolean) -> Unit,
     onCheckRecognizeClick: (Boolean) -> Unit,
     onCheckMFNRClick: (Boolean) -> Unit,
@@ -90,19 +86,9 @@ private fun SettingScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     SettingItem(
-                        title = "前面カメラ",
-                        isChecked = state.cameraMode.isLensFacingChecked,
-                        onCheckedChange = onCheckLensFacingClick,
-                    )
-                    SettingItem(
-                        title = "アスペクト比16:9",
-                        isChecked = state.cameraMode.isCaptureRatioChecked,
-                        onCheckedChange = onCheckAspectRatioClick,
-                    )
-                    SettingItem(
-                        title = "高解像度",
-                        isChecked = state.cameraMode.isResolutionChecked,
-                        onCheckedChange = onCheckResolutionClick,
+                        title = "キャプチャノイズ軽減",
+                        isChecked = state.cameraMode.isUseMFNRImageCaptureChecked,
+                        onCheckedChange = onCheckMFNRClick,
                     )
                     SettingItem(
                         title = "画像認識",
@@ -110,9 +96,9 @@ private fun SettingScreen(
                         onCheckedChange = onCheckRecognizeClick,
                     )
                     SettingItem(
-                        title = "キャプチャノイズ軽減",
-                        isChecked = state.cameraMode.isUseMFNRImageCaptureChecked,
-                        onCheckedChange = onCheckMFNRClick,
+                        title = "高解像度",
+                        isChecked = state.cameraMode.isResolutionChecked,
+                        onCheckedChange = onCheckResolutionClick,
                     )
                 }
                 ScrollBar(scrollState = scrollState)
@@ -166,8 +152,6 @@ private fun SettingItem(
 private fun VerticalPreview() {
     SettingScreen(
         state = SettingViewModel.State.initialize(),
-        onCheckLensFacingClick = {},
-        onCheckAspectRatioClick = {},
         onCheckResolutionClick = {},
         onCheckRecognizeClick = {},
         onCheckMFNRClick = {},
@@ -181,8 +165,6 @@ private fun VerticalPreview() {
 private fun HorizontalPreview() {
     SettingScreen(
         state = SettingViewModel.State.initialize(),
-        onCheckLensFacingClick = {},
-        onCheckAspectRatioClick = {},
         onCheckResolutionClick = {},
         onCheckRecognizeClick = {},
         onCheckMFNRClick = {},

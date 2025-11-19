@@ -3,6 +3,7 @@ package com.example.badcameraapplication.ui.camera.util
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -55,15 +56,16 @@ class CameraProvider(
                 contentValues
             ) ?: return
 
-            captureCompleter = CompletableDeferred()
             var isError = false
+            captureCompleter = CompletableDeferred()
             imageCapturedCallback = ImageCapturedCallback(
                 context = context,
                 onStartCapture = onStartCapture,
                 onSuccessCapture = { bitmap ->
+                    val rotateBitmap = bitmap.rotate(90f)
                     context.contentResolver.openOutputStream(imageUri).use { outstay ->
                         checkNotNull(outstay)
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outstay)
+                        rotateBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outstay)
                         showToast(text = "写真を保存しました: ${contentValues.get(MediaStore.MediaColumns.DISPLAY_NAME)}")
                     }
                     captureCompleter?.complete(Unit)
@@ -122,7 +124,7 @@ class CameraProvider(
             ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
         )
         val aspectRatioStrategy = AspectRatioStrategy(
-            if (cameraMode.isCaptureRatioChecked) {
+            if (cameraMode.isResolutionChecked) {
                 CameraState.highSpecification.captureRatio
             } else {
                 CameraState.default.captureRatio
@@ -180,5 +182,10 @@ class CameraProvider(
             text,
             Toast.LENGTH_SHORT,
         ).show()
+    }
+
+    private fun Bitmap.rotate(degrees: Float): Bitmap {
+        val matrix = Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
     }
 }

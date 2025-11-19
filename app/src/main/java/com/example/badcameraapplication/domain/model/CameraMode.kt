@@ -4,8 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CameraMode(
-    val isLensFacingChecked: Boolean,
-    val isCaptureRatioChecked: Boolean,
     val isResolutionChecked: Boolean,
     val isZoomLevelChecked: Boolean,
     val isUseImageAnalyzerChecked: Boolean,
@@ -13,8 +11,6 @@ data class CameraMode(
 ){
     companion object{
         val default = CameraMode(
-            isLensFacingChecked = false,
-            isCaptureRatioChecked = false,
             isResolutionChecked = false,
             isZoomLevelChecked = false,
             isUseImageAnalyzerChecked = false,

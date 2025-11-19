@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -40,6 +41,8 @@ import com.example.badcameraapplication.core.performance.MemoryMonitor
 import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.ui.camera.CameraNavKey
 import com.example.badcameraapplication.ui.camera.cameraScreen
+import com.example.badcameraapplication.ui.camera2.Camera2NavKey
+import com.example.badcameraapplication.ui.camera2.camera2Screen
 import com.example.badcameraapplication.ui.setting.SettingNavKey
 import com.example.badcameraapplication.ui.setting.settingScreen
 import kotlinx.serialization.Serializable
@@ -83,7 +86,8 @@ fun MainScreen(
             onBack = backStack::removeLast,
             entryProvider = entryProvider {
                 rootScreen(
-                    onNavigateToCameraClick = { backStack.add(CameraNavKey(CameraMode.default)) }
+                    onNavigateToCameraClick = { backStack.add(CameraNavKey(CameraMode.default)) },
+                    onNavigateToCamera2Click = { backStack.add(Camera2NavKey) }
                 )
                 cameraScreen(
                     onBackClick = backStack::removeLast,
@@ -98,6 +102,7 @@ fun MainScreen(
                         backStack.add(CameraNavKey(key))
                     }
                 )
+                camera2Screen(onBackClick = backStack::removeLast)
             }
         )
         DisplayPerformance(
@@ -114,15 +119,22 @@ fun MainScreen(
 @Serializable
 private data object RootNavKey : NavKey
 
-private fun EntryProviderScope<NavKey>.rootScreen(onNavigateToCameraClick: () -> Unit) {
+private fun EntryProviderScope<NavKey>.rootScreen(
+    onNavigateToCameraClick: () -> Unit,
+    onNavigateToCamera2Click: () -> Unit,
+) {
     entry<RootNavKey> {
-        RootScreen(onNavigateToCameraClick = onNavigateToCameraClick)
+        RootScreen(
+            onNavigateToCameraClick = onNavigateToCameraClick,
+            onNavigateToCamera2Click = onNavigateToCamera2Click,
+        )
     }
 }
 
 @Composable
 private fun RootScreen(
     onNavigateToCameraClick: () -> Unit,
+    onNavigateToCamera2Click: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -134,6 +146,13 @@ private fun RootScreen(
             modifier = Modifier.fillMaxWidth(0.75f),
         ) {
             Text(text = "カメラを起動")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = onNavigateToCamera2Click,
+            modifier = Modifier.fillMaxWidth(0.75f),
+        ) {
+            Text(text = "カメラ2を起動")
         }
     }
 }

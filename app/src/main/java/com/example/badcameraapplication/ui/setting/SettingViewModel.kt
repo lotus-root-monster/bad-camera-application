@@ -24,18 +24,6 @@ class SettingViewModel @Inject constructor() : ViewModel() {
         cameraMode.value = initialCameraMode
     }
 
-    fun onCheckLensFacingClick(isCheck: Boolean) {
-        cameraMode.value = cameraMode.value.copy(
-            isLensFacingChecked = isCheck
-        )
-    }
-
-    fun onCheckAspectRatioClick(isCheck: Boolean) {
-        cameraMode.value = cameraMode.value.copy(
-            isCaptureRatioChecked = isCheck
-        )
-    }
-
     fun onCheckResolutionClick(isCheck: Boolean) {
         cameraMode.value = cameraMode.value.copy(
             isResolutionChecked = isCheck

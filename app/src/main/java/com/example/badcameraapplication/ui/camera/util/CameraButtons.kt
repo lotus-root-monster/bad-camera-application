@@ -3,19 +3,17 @@ package com.example.badcameraapplication.ui.camera.util
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,35 +30,68 @@ import com.example.badcameraapplication.R
 
 @Composable
 fun BoxScope.CameraButtonsLayout(
+    isPortrait: Boolean,
     onNavigateToSettingClick: () -> Unit,
     onCameraClick: () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
-    Row(
-        modifier = Modifier
-            .safeDrawingPadding()
-            .align(Alignment.BottomCenter)
-            .horizontalScroll(scrollState)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.10f))
-            .border(
-                width = 2.dp,
-                color = Color.White.copy(alpha = 0.5f),
-                shape = CircleShape,
+    if (isPortrait) {
+        Row(
+            modifier = Modifier
+                .safeDrawingPadding()
+                .fillMaxWidth(0.8f)
+                .align(Alignment.BottomCenter)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(
+                    width = 2.dp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Button(
+                iconResId = R.drawable.ic_camera,
+                contentDescription = "写真撮影",
+                onClick = onCameraClick,
+                modifier = Modifier.weight(1f),
             )
-    ) {
-        Spacer(modifier = Modifier.width(32.dp))
-        Button(
-            iconResId = R.drawable.ic_camera,
-            contentDescription = "写真撮影",
-            onClick = onCameraClick,
-        )
-        Button(
-            iconResId = R.drawable.ic_settings,
-            contentDescription = "カメラ設定",
-            onClick = onNavigateToSettingClick,
-        )
-        Spacer(modifier = Modifier.width(32.dp))
+            Button(
+                iconResId = R.drawable.ic_settings,
+                contentDescription = "カメラ設定",
+                onClick = onNavigateToSettingClick,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .safeDrawingPadding()
+                .fillMaxHeight(0.8f)
+                .align(Alignment.CenterEnd)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(
+                    width = 2.dp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Button(
+                iconResId = R.drawable.ic_camera,
+                contentDescription = "写真撮影",
+                onClick = onCameraClick,
+                modifier = Modifier.weight(1f),
+            )
+            Button(
+                iconResId = R.drawable.ic_settings,
+                contentDescription = "カメラ設定",
+                onClick = onNavigateToSettingClick,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
@@ -69,15 +100,16 @@ private fun Button(
     @DrawableRes iconResId: Int,
     contentDescription: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
         IconButton(
             onClick = onClick,
             modifier = Modifier
+                .padding(16.dp)
                 .size(100.dp)
                 .border(
                     width = 3.dp,
@@ -105,6 +137,7 @@ private fun Button(
 private fun VerticalPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         CameraButtonsLayout(
+            isPortrait = true,
             onNavigateToSettingClick = {},
             onCameraClick = {},
         )
@@ -119,6 +152,7 @@ private fun VerticalPreview() {
 private fun HorizontalPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         CameraButtonsLayout(
+            isPortrait = false,
             onNavigateToSettingClick = {},
             onCameraClick = {},
         )

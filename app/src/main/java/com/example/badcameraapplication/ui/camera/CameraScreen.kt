@@ -1,6 +1,7 @@
 package com.example.badcameraapplication.ui.camera
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.ImageAnalysis
@@ -19,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -63,10 +66,12 @@ fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    configuration: Configuration = LocalConfiguration.current,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val isPortrait by remember { derivedStateOf { configuration.orientation == Configuration.ORIENTATION_PORTRAIT } }
 
     val cameraProvider = remember {
         CameraProvider(
@@ -115,6 +120,7 @@ fun CameraScreen(
     CameraScreen(
         state = state,
         isGranted = cameraPermissionState.status.isGranted,
+        isPortrait = isPortrait,
         onBackClick = onBackClick,
         onNavigateToSettingClick = { onNavigateToSettingClick(state.cameraMode) },
         onLaunchPermissionRequest = cameraPermissionState::launchPermissionRequest,
@@ -126,6 +132,7 @@ fun CameraScreen(
 private fun CameraScreen(
     state: CameraViewModel.State,
     isGranted: Boolean,
+    isPortrait: Boolean,
     onBackClick: () -> Unit,
     onNavigateToSettingClick: () -> Unit,
     onLaunchPermissionRequest: () -> Unit,
@@ -140,6 +147,7 @@ private fun CameraScreen(
         if (isGranted) {
             CameraXViewFinder(surfaceRequest = state.surfaceRequest)
             CameraButtonsLayout(
+                isPortrait = isPortrait,
                 onNavigateToSettingClick = onNavigateToSettingClick,
                 onCameraClick = onCameraClick,
             )
@@ -230,6 +238,7 @@ private fun Preview() {
     CameraScreen(
         state = CameraViewModel.State.initialize(),
         isGranted = true,
+        isPortrait = true,
         onBackClick = {},
         onNavigateToSettingClick = {},
         onLaunchPermissionRequest = {},
