@@ -42,7 +42,7 @@ androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.
 hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version = "1.3.0" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3"}
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cameraCore" }
@@ -52,6 +52,8 @@ androidx-camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision",
 androidx-camera-video = { module = "androidx.camera:camera-video", version.ref = "cameraCore" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 mlkit-image-labeling = { module = "com.google.mlkit:image-labeling", version = "17.0.9" }
+opencv = { module = "org.opencv:opencv", version = "4.12.0" }
+android-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -59,6 +61,6 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 # Optional plugins
-jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization"}
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -32,7 +32,7 @@ android {
             )
         }
     }
-    java  {
+    java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
@@ -77,4 +77,6 @@ dependencies {
     implementation(libs.androidx.camera.mlkit.vision)
     implementation(libs.androidx.camera.extensions)
     implementation(libs.mlkit.image.labeling)
+    implementation(libs.opencv)
+    implementation(libs.android.startup.runtime)
 }

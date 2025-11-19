@@ -1,4 +1,4 @@
-package com.example.badcameraapplication.ui.camera.util
+package com.example.badcameraapplication.core.image
 
 import android.util.Log
 import androidx.annotation.OptIn
@@ -9,7 +9,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 
-class ImageAnalyzer : ImageAnalysis.Analyzer {
+class ImageRecognition : ImageAnalysis.Analyzer {
     val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
 
     @OptIn(ExperimentalGetImage::class)

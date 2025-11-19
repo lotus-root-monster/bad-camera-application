@@ -16,11 +16,15 @@ class CameraViewModel @Inject constructor() : ViewModel() {
     private val surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     private val isShowWarningDialog = MutableStateFlow(false)
     private val cameraMode = MutableStateFlow<CameraMode?>(null)
+    private val cameraLoadingState = MutableStateFlow<CameraLoadingState>(
+        CameraLoadingState.Initial
+    )
 
     val state = combine(
         surfaceRequest,
         isShowWarningDialog,
         cameraMode,
+        cameraLoadingState,
         ::State
     ).stateIn(
         scope = viewModelScope,
@@ -38,17 +42,32 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         surfaceRequest.value = newSurfaceRequest
     }
 
+    fun onStartCapture() {
+        cameraLoadingState.value = CameraLoadingState.Loading
+    }
+
+    fun onCompleteCapture() {
+        cameraLoadingState.value = CameraLoadingState.Initial
+    }
+
     data class State(
         val surfaceRequest: SurfaceRequest?,
         val isShowWarningDialog: Boolean,
-        val cameraMode: CameraMode?
+        val cameraMode: CameraMode?,
+        val cameraLoadingState: CameraLoadingState,
     ) {
         companion object {
             fun initialize() = State(
                 surfaceRequest = null,
                 isShowWarningDialog = false,
                 cameraMode = null,
+                cameraLoadingState = CameraLoadingState.Initial,
             )
         }
+    }
+
+    sealed interface CameraLoadingState {
+        data object Initial : CameraLoadingState
+        data object Loading : CameraLoadingState
     }
 }

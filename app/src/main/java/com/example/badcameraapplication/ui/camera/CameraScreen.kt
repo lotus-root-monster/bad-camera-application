@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -36,6 +40,7 @@ import com.example.badcameraapplication.ui.components.BackButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.CoroutineScope
 import androidx.camera.core.Preview as CameraPreview
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -47,6 +52,7 @@ fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
@@ -56,6 +62,9 @@ fun CameraScreen(
             cameraMode = cameraMode ?: CameraMode.default,
             context = context,
             lifecycleOwner = lifecycleOwner,
+            coroutineScope = coroutineScope,
+            onStartCapture = viewModel::onStartCapture,
+            onCompleteCapture = viewModel::onCompleteCapture,
         )
     }
     val preview = remember {
@@ -77,7 +86,7 @@ fun CameraScreen(
 
     LaunchedEffect(cameraPermissionState) {
         snapshotFlow { cameraPermissionState.status.isGranted }.collect {
-            if(it) {
+            if (it) {
                 cameraProvider.bindCamera(
                     preview = preview,
                     imageCapture = imageCapture,
@@ -139,6 +148,12 @@ private fun CameraScreen(
                 .align(Alignment.TopStart)
                 .safeDrawingPadding()
         )
+    }
+
+    if (state.cameraLoadingState is CameraViewModel.CameraLoadingState.Loading) {
+        Dialog(onDismissRequest = {}) {
+            CircularProgressIndicator(modifier = Modifier.size(100.dp))
+        }
     }
 }
 

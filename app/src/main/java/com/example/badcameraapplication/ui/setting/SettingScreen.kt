@@ -50,19 +50,9 @@ fun SettingScreen(
         onCheckLensFacingClick = viewModel::onCheckLensFacingClick,
         onCheckAspectRatioClick = viewModel::onCheckAspectRatioClick,
         onCheckResolutionClick = viewModel::onCheckResolutionClick,
-        onCheckZoomClick = viewModel::onCheckZoomClick,
         onCheckRecognizeClick = viewModel::onCheckRecognizeClick,
-        onSaveClick = {
-            onNavigateToCamera(
-                CameraMode(
-                    isLensFacingChecked = state.isLensFacingChecked,
-                    isCaptureRatioChecked = state.isCaptureRatioChecked,
-                    isResolutionChecked = state.isResolutionChecked,
-                    isZoomLevelChecked = state.isZoomLevelChecked,
-                    isUseImageAnalyzerChecked = state.isUseImageAnalyzerChecked,
-                )
-            )
-        },
+        onCheckMFNRClick = viewModel::onCheckMFNRClick,
+        onSaveClick = { onNavigateToCamera(state.cameraMode) },
         onBackClick = onBackClick,
     )
 }
@@ -73,8 +63,8 @@ private fun SettingScreen(
     onCheckLensFacingClick: (Boolean) -> Unit,
     onCheckAspectRatioClick: (Boolean) -> Unit,
     onCheckResolutionClick: (Boolean) -> Unit,
-    onCheckZoomClick: (Boolean) -> Unit,
     onCheckRecognizeClick: (Boolean) -> Unit,
+    onCheckMFNRClick: (Boolean) -> Unit,
     onSaveClick: (CameraState) -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -100,28 +90,28 @@ private fun SettingScreen(
                 ) {
                     SettingItem(
                         title = "前面カメラ",
-                        isChecked = state.isLensFacingChecked,
+                        isChecked = state.cameraMode.isLensFacingChecked,
                         onCheckedChange = onCheckLensFacingClick,
                     )
                     SettingItem(
                         title = "アスペクト比16:9",
-                        isChecked = state.isCaptureRatioChecked,
+                        isChecked = state.cameraMode.isCaptureRatioChecked,
                         onCheckedChange = onCheckAspectRatioClick,
                     )
                     SettingItem(
                         title = "高解像度",
-                        isChecked = state.isResolutionChecked,
+                        isChecked = state.cameraMode.isResolutionChecked,
                         onCheckedChange = onCheckResolutionClick,
                     )
                     SettingItem(
-                        title = "最大ズーム",
-                        isChecked = state.isZoomLevelChecked,
-                        onCheckedChange = onCheckZoomClick,
+                        title = "画像認識",
+                        isChecked = state.cameraMode.isUseImageAnalyzerChecked,
+                        onCheckedChange = onCheckRecognizeClick,
                     )
                     SettingItem(
-                        title = "画像認識",
-                        isChecked = state.isUseImageAnalyzerChecked,
-                        onCheckedChange = onCheckRecognizeClick,
+                        title = "キャプチャノイズ軽減",
+                        isChecked = state.cameraMode.isUseMFNRImageCaptureChecked,
+                        onCheckedChange = onCheckMFNRClick,
                     )
                 }
                 ScrollBar(scrollState = scrollState)
@@ -178,8 +168,8 @@ private fun VerticalPreview() {
         onCheckLensFacingClick = {},
         onCheckAspectRatioClick = {},
         onCheckResolutionClick = {},
-        onCheckZoomClick = {},
         onCheckRecognizeClick = {},
+        onCheckMFNRClick = {},
         onSaveClick = {},
         onBackClick = {},
     )
@@ -193,8 +183,8 @@ private fun HorizontalPreview() {
         onCheckLensFacingClick = {},
         onCheckAspectRatioClick = {},
         onCheckResolutionClick = {},
-        onCheckZoomClick = {},
         onCheckRecognizeClick = {},
+        onCheckMFNRClick = {},
         onSaveClick = {},
         onBackClick = {},
     )

@@ -9,6 +9,7 @@ data class CameraMode(
     val isResolutionChecked: Boolean,
     val isZoomLevelChecked: Boolean,
     val isUseImageAnalyzerChecked: Boolean,
+    val isUseMFNRImageCaptureChecked: Boolean,
 ){
     companion object{
         val default = CameraMode(
@@ -17,6 +18,7 @@ data class CameraMode(
             isResolutionChecked = false,
             isZoomLevelChecked = false,
             isUseImageAnalyzerChecked = false,
+            isUseMFNRImageCaptureChecked = false,
         )
     }
 }
