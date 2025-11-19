@@ -117,7 +117,6 @@ fun Camera2Screen(
                         addTarget(jpegImageReader.surface)
 
                         set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
-                        // High quality settings for various features
                         set(
                             CaptureRequest.NOISE_REDUCTION_MODE,
                             CaptureRequest.NOISE_REDUCTION_MODE_HIGH_QUALITY
@@ -134,7 +133,6 @@ fun Camera2Screen(
                             CaptureRequest.HOT_PIXEL_MODE_HIGH_QUALITY
                         )
 
-                        // Enable stabilization if supported
                         val availableOisModes =
                             characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION)
                         if (availableOisModes?.contains(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON) == true) {
@@ -152,7 +150,6 @@ fun Camera2Screen(
                             )
                         }
 
-                        // Enable HDR if supported
                         val availableSceneModes =
                             characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES)
                         if (availableSceneModes?.contains(CaptureRequest.CONTROL_SCENE_MODE_HDR) == true) {
