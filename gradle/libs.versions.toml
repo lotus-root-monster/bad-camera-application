@@ -53,7 +53,8 @@ androidx-camera-video = { module = "androidx.camera:camera-video", version.ref =
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 mlkit-image-labeling = { module = "com.google.mlkit:image-labeling", version = "17.0.9" }
 opencv = { module = "org.opencv:opencv", version = "4.12.0" }
-android-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
+android-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
+face-detection = { module = "com.google.mlkit:face-detection", version = "16.1.7" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

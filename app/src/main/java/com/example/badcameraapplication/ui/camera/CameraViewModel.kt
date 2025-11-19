@@ -4,6 +4,7 @@ import androidx.camera.core.SurfaceRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.badcameraapplication.domain.model.CameraMode
+import com.example.badcameraapplication.domain.model.Image
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,12 +20,14 @@ class CameraViewModel @Inject constructor() : ViewModel() {
     private val cameraLoadingState = MutableStateFlow<CameraLoadingState>(
         CameraLoadingState.Initial
     )
+    private val faceImage = MutableStateFlow<Image?>(null)
 
     val state = combine(
         surfaceRequest,
         isShowWarningDialog,
         cameraMode,
         cameraLoadingState,
+        faceImage,
         ::State
     ).stateIn(
         scope = viewModelScope,
@@ -50,11 +53,16 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         cameraLoadingState.value = CameraLoadingState.Initial
     }
 
+    fun onSmileDetect(inputFaceImage: Image) {
+        faceImage.value = inputFaceImage
+    }
+
     data class State(
         val surfaceRequest: SurfaceRequest?,
         val isShowWarningDialog: Boolean,
         val cameraMode: CameraMode?,
         val cameraLoadingState: CameraLoadingState,
+        val faceImage: Image?,
     ) {
         companion object {
             fun initialize() = State(
@@ -62,6 +70,7 @@ class CameraViewModel @Inject constructor() : ViewModel() {
                 isShowWarningDialog = false,
                 cameraMode = null,
                 cameraLoadingState = CameraLoadingState.Initial,
+                faceImage = null,
             )
         }
     }

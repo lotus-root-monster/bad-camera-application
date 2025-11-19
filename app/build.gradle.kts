@@ -79,4 +79,5 @@ dependencies {
     implementation(libs.mlkit.image.labeling)
     implementation(libs.opencv)
     implementation(libs.android.startup.runtime)
+    implementation(libs.face.detection)
 }

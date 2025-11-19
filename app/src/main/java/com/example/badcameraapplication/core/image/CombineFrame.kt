@@ -1,6 +1,7 @@
 package com.example.badcameraapplication.core.image
 
 import android.graphics.Bitmap
+import android.graphics.Bitmap.createBitmap
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -37,15 +38,14 @@ fun combineFrames(
         accumulatedMatFloat,
     )
     val normalizedMat = Mat()
-    val totalFrames = frameCount + 1
     accumulatedMatFloat.convertTo(
         normalizedMat,
         CvType.CV_8UC4,
-        1.0 / totalFrames.toDouble(),
+        1.0 / frameCount.toDouble(),
     )
 
     // 締め作業
-    val resultBitmap = Bitmap.createBitmap(
+    val resultBitmap = createBitmap(
         accumulatedBitmap.width,
         accumulatedBitmap.height,
         accumulatedBitmap.config!!,

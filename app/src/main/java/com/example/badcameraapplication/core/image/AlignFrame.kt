@@ -21,8 +21,6 @@ fun alignFrame(
     val matCurrent = Mat()
     Utils.bitmapToMat(referenceFrame, matReference)
     Utils.bitmapToMat(currentFrame, matCurrent)
-    Imgproc.cvtColor(matReference, matReference, Imgproc.COLOR_RGB2GRAY)
-    Imgproc.cvtColor(matCurrent, matCurrent, Imgproc.COLOR_RGB2GRAY)
 
     // 特徴点抽出・マッチング
     val orb = ORB.create()

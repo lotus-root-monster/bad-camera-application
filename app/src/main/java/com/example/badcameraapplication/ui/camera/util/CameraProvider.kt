@@ -16,9 +16,10 @@ import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import com.example.badcameraapplication.core.image.ImageRecognition
+import com.example.badcameraapplication.core.image.FaceRecognition
 import com.example.badcameraapplication.domain.model.CameraMode
 import com.example.badcameraapplication.domain.model.CameraState
+import com.example.badcameraapplication.domain.model.Image
 import com.example.badcameraapplication.ui.camera.util.ImageCapturedCallback.Companion.FLAME_QUEUE_SIZE
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,7 @@ class CameraProvider(
     private val coroutineScope: CoroutineScope,
     private val onStartCapture: () -> Unit,
     private val onCompleteCapture: () -> Unit,
+    private val onSmileDetect: (Image) -> Unit,
 ) {
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
     private var captureCompleter: CompletableDeferred<Unit>? = null
@@ -145,7 +147,7 @@ class CameraProvider(
                 if (cameraMode.isUseImageAnalyzerChecked) {
                     imageAnalyzer?.setAnalyzer(
                         Executors.newSingleThreadExecutor(),
-                        ImageRecognition(),
+                        FaceRecognition(onSmileDetect = onSmileDetect),
                     )
                 }
                 try {
